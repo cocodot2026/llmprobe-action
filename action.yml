@@ -39,7 +39,7 @@ runs:
       shell: bash
       run: |
         pip install --quiet openai
-        curl -sSL https://raw.githubusercontent.com/cocodot2026/LLMprobe/main/llmprobe.py -o "$RUNNER_TEMP/llmprobe.py"
+        curl -sSL https://raw.githubusercontent.com/cocodot2026/cocodot-llmprobe/main/llmprobe.py -o "$RUNNER_TEMP/llmprobe.py"
 
     - name: Run LLMprobe
       shell: bash

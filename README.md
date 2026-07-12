@@ -2,7 +2,7 @@
 
 **A GitHub Action that fails your CI when your AI API relay is degraded or silently
 model-downgraded — automated verification with the open-source
-[LLMprobe](https://github.com/cocodot2026/LLMprobe).**
+[cocodot-llmprobe](https://github.com/cocodot2026/cocodot-llmprobe).**
 
 If your app depends on a relay serving the *real* model, don't find out it got
 swapped for a cheap one when your users do. Run this on a schedule (or on deploy)
@@ -49,7 +49,7 @@ jobs:
 
 ## Where it fits
 Part of a small honest toolkit for running AI from China:
-[LLMprobe](https://github.com/cocodot2026/LLMprobe) (the verifier) ·
+[cocodot-llmprobe](https://github.com/cocodot2026/cocodot-llmprobe) (the verifier) ·
 [relay-doctor](https://github.com/cocodot2026/relay-doctor) (quick health check) ·
 [ai-coding-from-china](https://github.com/cocodot2026/ai-coding-from-china) (the full skill).
 
