@@ -1,0 +1,76 @@
+name: "LLMprobe downgrade check"
+description: "Fail CI if your AI API relay is degraded or silently model-downgraded, using the open-source LLMprobe verifier."
+branding:
+  icon: "activity"
+  color: "blue"
+
+inputs:
+  base-url:
+    description: "OpenAI-compatible base URL of the relay to check (e.g. https://relay/v1)"
+    required: true
+  api-key:
+    description: "API key for the relay. Pass a secret — never hardcode."
+    required: true
+  model:
+    description: "Model id to verify"
+    required: true
+  min-score:
+    description: "Fail the job if the LLMprobe score is below this (0-100)"
+    required: false
+    default: "70"
+  judge-base-url:
+    description: "Optional independent judge endpoint base URL (for the capability probe)"
+    required: false
+    default: ""
+  judge-api-key:
+    description: "Optional independent judge endpoint key"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.x"
+
+    - name: Install deps + fetch LLMprobe
+      shell: bash
+      run: |
+        pip install --quiet openai
+        curl -sSL https://raw.githubusercontent.com/cocodot2026/LLMprobe/main/llmprobe.py -o "$RUNNER_TEMP/llmprobe.py"
+
+    - name: Run LLMprobe
+      shell: bash
+      env:
+        RELAY_KEY: ${{ inputs.api-key }}
+        JUDGE_KEY: ${{ inputs.judge-api-key }}
+      run: |
+        set -o pipefail
+        extra=""
+        if [ -n "${{ inputs.judge-base-url }}" ]; then
+          extra="--judge-base-url ${{ inputs.judge-base-url }} --judge-api-key $JUDGE_KEY"
+        fi
+        python "$RUNNER_TEMP/llmprobe.py" \
+          --base-url "${{ inputs.base-url }}" \
+          --api-key "$RELAY_KEY" \
+          --model "${{ inputs.model }}" \
+          $extra | tee "$RUNNER_TEMP/probe.txt"
+
+    - name: Enforce minimum score
+      shell: bash
+      run: |
+        # Extract the first "NN/100" (or "NN.N/100") from LLMprobe output.
+        score=$(grep -oE '[0-9]+(\.[0-9]+)?/100' "$RUNNER_TEMP/probe.txt" | head -1 | cut -d/ -f1)
+        if [ -z "$score" ]; then
+          echo "::warning::Could not parse an NN/100 score from LLMprobe output. Check the log above."
+          exit 1
+        fi
+        echo "LLMprobe score: $score / 100 (threshold: ${{ inputs.min-score }})"
+        # integer compare (drop any decimals)
+        if [ "${score%%.*}" -lt "${{ inputs.min-score }}" ]; then
+          echo "::error::Relay score $score is below threshold ${{ inputs.min-score }} — possible downgrade/degradation."
+          exit 1
+        fi
+        echo "::notice::Relay passed downgrade check ($score/100)."
