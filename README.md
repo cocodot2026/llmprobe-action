@@ -53,5 +53,5 @@ Part of a small honest toolkit for running AI from China:
 [relay-doctor](https://github.com/cocodot2026/relay-doctor) (quick health check) ·
 [ai-coding-from-china](https://github.com/cocodot2026/ai-coding-from-china) (the full skill).
 
-The author builds [cocodot](https://cocodot.co), a relay — disclosed; this Action
+The author builds [cocodot](https://cocodot.co?utm_source=github&utm_medium=readme&utm_campaign=llmprobe-action), a relay — disclosed; this Action
 works against **any** endpoint. MIT.
